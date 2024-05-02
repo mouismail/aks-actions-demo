@@ -58,9 +58,9 @@ jobs:
         run: kubectl apply -f k8s/staging -n ${{ env.STAGING_NAMESPACE }}
 
   deploy-to-production:
-    needs: [build-and-push, deploy-to-staging]
+    needs: deploy-to-staging
     environment:
-      name: production
+      name: Production
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
