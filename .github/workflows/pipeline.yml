@@ -10,10 +10,12 @@ on:
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}
+  CLUSTER_RESOURCE_GROUP: mouismail
   STAGING_CLUSTER: mouismail-test
   PRODUCTION_CLUSTER: mouismail-test
   STAGING_NAMESPACE: sap-staging
   PRODUCTION_NAMESPACE: sap-prod
+  STAGING_SECRET: avf-secret
 
 jobs:
   build-and-push:
@@ -51,8 +53,22 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Set current Kubernetes context to staging cluster
-        run: az aks get-credentials --resource-group mouimsail --name ${{ env.STAGING_CLUSTER }}
+      - uses: azure/aks-set-context@v1
+        with:
+          creds:  ${{ secrets.AZURE_CREDENTIALS }}
+          cluster-name: ${{ env.STAGING_CLUSTER }}
+          resource-group: ${{ env.CLUSTER_RESOURCE_GROUP }}
+
+      - uses: azure/k8s-create-secret@v1
+        with:
+          container-registry-url: ${{env.IMAGE_NAME}}
+          container-registry-username: ${{ github.actor }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          secret-name: ${{ env.STAGING_SECRET }}
+          namespace: ${{ env.STAGING_NAMESPACE }}
+
+      # - name: Set current Kubernetes context to staging cluster
+      #   run: az aks get-credentials --resource-group mouimsail --name ${{ env.STAGING_CLUSTER }}
 
       - name: Deploy to staging
         run: kubectl apply -f k8s/staging -n ${{ env.STAGING_NAMESPACE }}
