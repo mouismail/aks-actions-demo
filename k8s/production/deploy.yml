@@ -1,0 +1,40 @@
+# k8s/production/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aks-actions-demo-production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aks-actions-demo-production
+  template:
+    metadata:
+      labels:
+        app: aks-actions-demo-production
+    spec:
+        containers:
+        - name: aks-actions-demo-production
+          image: ghcr.io/mouismail/aks-actions-demo:latest
+          ports:
+          - containerPort: 2024
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "512Mi"
+            requests:
+              cpu: "0.1"
+              memory: "256Mi"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: aks-actions-demo-production
+spec:
+  selector:
+    app: aks-actions-demo-production
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 2024
