@@ -35,7 +35,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ env.REGISTRY }}:latest
 
   deploy-to-staging:
     needs: build-and-push
@@ -50,7 +50,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set current Kubernetes context to staging cluster
-        run: az aks get-credentials --resource-group mouimsail-resource-group --name ${{ env.STAGING_CLUSTER }}
+        run: az aks get-credentials --resource-group mouimsail --name ${{ env.STAGING_CLUSTER }}
 
       - name: Deploy to staging
         run: kubectl apply -f k8s/staging -n ${{ env.STAGING_NAMESPACE }}
@@ -70,7 +70,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set current Kubernetes context to production cluster
-        run: az aks get-credentials --resource-group mouimsail-resource-group --name ${{ env.PRODUCTION_CLUSTER }}
+        run: az aks get-credentials --resource-group mouimsail --name ${{ env.PRODUCTION_CLUSTER }}
 
       - name: Deploy to production
         run: kubectl apply -f k8s/production -n ${{ env.PRODUCTION_NAMESPACE }}
